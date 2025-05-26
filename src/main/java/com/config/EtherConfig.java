@@ -36,6 +36,6 @@ public interface EtherConfig extends Config
 		name = "",
 		description = ""
 	)
-	default int[] etherCounts() { return new int[]{0, 0, 0, 0, 0, 0}; }
+	default int[] etherCounts() { return new int[]{0, 0, 0}; }
 
 }

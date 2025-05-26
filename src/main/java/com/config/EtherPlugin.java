@@ -4,15 +4,14 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.HitsplatApplied;
-import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.*;
 import net.runelite.api.kit.KitType;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+
+import java.util.ArrayList;
 
 @Slf4j
 @PluginDescriptor(
@@ -75,17 +74,19 @@ public class EtherPlugin extends Plugin
 	private void print(String s) {
 		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", s, null);
 	}
+	private int etherCount = 0;
 	private RevenantWeapon equippedRevWeapon = RevenantWeapon.NOT_REV_WEAPON;
 
 	@Override
 	protected void startUp() throws Exception
 	{
+
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Example stopped!");
+
 	}
 	@Subscribe
 	public void onItemContainerChanged(final ItemContainerChanged event) {
@@ -101,7 +102,7 @@ public class EtherPlugin extends Plugin
 	{
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
-			//client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
+
 		}
 	}
 	@Subscribe
@@ -112,10 +113,11 @@ public class EtherPlugin extends Plugin
 		if (equippedRevWeapon == RevenantWeapon.NOT_REV_WEAPON){
 			return;
 		}
-		print(equippedRevWeapon.name());
-		//this doesnt work
-		config.etherCounts()[equippedRevWeapon.ordinal()] -= 1;
-		System.out.println((config.etherCounts()[equippedRevWeapon.ordinal()]));
+		if (event.getActor() == client.getLocalPlayer()) {
+			return;
+		}
+		etherCount -= 1;
+		print(String.valueOf(etherCount));
 	}
 	@Subscribe
 	public void onChatMessage(ChatMessage event) {
@@ -123,7 +125,20 @@ public class EtherPlugin extends Plugin
 		if (!message.contains("charges")){
 			return;
 		}
-
+		ArrayList<Integer> numbersInString = new ArrayList<>();
+		for (int i = 0; i < message.length();i++) {
+			if (Character.isDigit(message.charAt(i))){
+				StringBuilder integer = new StringBuilder();
+				integer.append(message.charAt(i));
+				while (Character.isDigit(message.charAt(i+1)) && i+1 < message.length()){
+					i++;
+					integer.append(message.charAt(i));
+				}
+				numbersInString.add(Integer.valueOf(String.valueOf(integer)));
+				break;
+			}
+		}
+		etherCount = numbersInString.get(numbersInString.size()-1);
 
 	}
 	}
